@@ -1,0 +1,17 @@
+  set number
+  highlight LineNr ctermfg=green
+  set background=dark
+  set autoindent
+  set expandtab
+  set tabstop=4
+  set shiftwidth=4
+
+  function! NumberToggle()
+    if(&number == 1)
+      set nonumber
+    else
+      set number
+    endif
+  endfunc
+
+  nnoremap <C-\> :call NumberToggle()<cr>

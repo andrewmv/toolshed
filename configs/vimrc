@@ -1,0 +1,36 @@
+"Andrew Villeneuve's vimrc, 2018
+"Sets reasonable values for indentation and syntax highlighting.
+"Cycles through line numbering modes with Crtl-\
+"By making absolute line numbers yellow, and relative line numbers green,
+"there's less confusion about the current context.
+
+  set number                        "Line numbers on
+  set relativenumber                "Relative line number mode
+  highlight LineNr ctermfg=green    "Line number color
+  set background=dark               "Use text colors appropriate for a white-on-black terminal window
+  set autoindent                    "Code-style indentation
+  set expandtab                     "Indent with spaces instead of tabs
+  set tabstop=4                     "This many spaces
+  set shiftwidth=4                  "Makes << and >> work
+
+  "Function to cycle though line numbering modes
+  function! NumberToggle()
+    "Transition line numbers from relative -> regular
+    if(&relativenumber == 1) 
+      set norelativenumber
+      set number
+      highlight LineNr ctermfg=yellow
+    "Transition line numbers from regular -> off
+    elseif(&number == 1)
+      set nonumber
+      set norelativenumber
+      highlight LineNr ctermfg=green
+    "Transtion line numbers from off -> relative
+    else
+      set relativenumber
+      set number
+    endif
+  endfunc
+
+  nnoremap <C-\> :call NumberToggle()<cr>
+

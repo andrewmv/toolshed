@@ -1,0 +1,32 @@
+### EC2 Hosts ###
+Host ec2-build-cn build-cn web-cn-01 web-cn-02
+    IdentityFile ~/.ssh/aws-cn.pem
+    User ec2-user
+
+Host web-cn-01
+    Hostname ec2-52-80-140-152.cn-north-1.compute.amazonaws.com.cn
+
+Host web-cn-02
+    Hostname ec2-52-80-62-6.cn-north-1.compute.amazonaws.com.cn
+
+Host ec2-build-cn
+    Hostname ec2-54-223-199-254.cn-north-1.compute.amazonaws.com.cn
+
+Host devbox
+    Hostname ec2-18-188-94-225.us-east-2.compute.amazonaws.com
+    User centos
+    IdentityFile ~/.ssh/aws-us.pem
+
+Host dev.staging-concur.com
+    User centos
+    IdentityFile ~/.ssh/aws-us.pem
+
+### Bastion Configuration ###
+Host seapr1bast
+    User andrew.villeneuve
+
+### Bastion catchall for all hosts in Lynwood network ###
+Host seapr1cpr* seapr1cpn* puppetmaster seacorp* 10.203.* 10.205.*
+    User andrew.villeneuve
+    ProxyCommand ssh seapr1bast -W %h:%p
+    
