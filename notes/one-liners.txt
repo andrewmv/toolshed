@@ -1,0 +1,5 @@
+one-liners.txt
+
+#Keep the last 30 days of BitWarden MSSql DB dumps, in addition to the first dump of every month. - AMV 2020/05/24
+find /volume1/Photos/Backup/GoatLocker/home/ec2-user/bwdata/mssql/backups -daystart -mtime +30 ! -name "*01_*" -exec rm -vf {} \;
+
