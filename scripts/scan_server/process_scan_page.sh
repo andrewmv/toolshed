@@ -28,6 +28,10 @@ SCANFILE=$3
 
 TARGET=$(echo ${SCANFILE} | sed -r 's/scan([0-9]*\.pnm)/rotated\1/')
 ROTATE=$(tesseract ${SCANFILE} stdout --oem 0 --psm 0 2>/dev/null | grep '^Rotate: ' | sed -r 's/^Rotate: ([0-9]*)$/\1/')
+if [ -v ${ROTATE} ]; then
+    logger "scan job $SCANJOB: Failed to detect rotation of $PAGE"
+    ROTATE=0
+fi
 logger "scan job $SCANJOB: Rotating page $PAGE by $ROTATE degress"
 convert $SCANFILE -rotate $ROTATE -trim -fuzz ${FUZZ_FACTOR} $TARGET
 #    rm ${SCANFILE}
