@@ -54,7 +54,7 @@ if [[ $? -ne 0 ]]; then
     logger "scan job $SCANJOB: Failed to OCR page $PAGE - creating non-searchable PDF"
     convert ${SCANFILE} ${TARGET}.pdf
 fi
-rm {SCANFILE}
+rm ${SCANFILE}
 
 # Fix the tesseract bug that fails to embed DPI value correct
 
