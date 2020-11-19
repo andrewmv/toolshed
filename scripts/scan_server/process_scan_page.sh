@@ -15,7 +15,7 @@ fi
 FUZZ_FACTOR="8%"
 
 # Extra deskewing controls
-UNPAPER_EXTRA_ARGS="--layout single --deskew-scan-range 10 --no-grayfilter --mask-scan-threshold 0.55"
+UNPAPER_EXTRA_ARGS="--layout single --deskew-scan-range 10 --no-grayfilter --mask-scan-threshold 0.25"
 SKIP_DESKEWING=False 
 
 ### The Good Stuff ###
@@ -34,7 +34,7 @@ if [ -v ${ROTATE} ]; then
 fi
 logger "scan job $SCANJOB: Rotating page $PAGE by $ROTATE degress"
 convert $SCANFILE -rotate $ROTATE -trim -fuzz ${FUZZ_FACTOR} $TARGET
-#    rm ${SCANFILE}
+rm ${SCANFILE}
 SCANFILE=${TARGET}
 
 # Fix contrast and deskew
@@ -42,6 +42,7 @@ SCANFILE=${TARGET}
 TARGET=$(echo ${SCANFILE} | sed -r 's/rotated([0-9]*\.pnm)/deskewed\1/')
 logger "scan job $SCANJOB: Deskewing page $PAGE"
 unpaper ${SCANFILE} ${TARGET} ${UNPAPER_EXTRA_ARGS}
+rm ${SCANFILE}
 SCANFILE=${TARGET}
 
 # OCR
@@ -53,6 +54,7 @@ if [[ $? -ne 0 ]]; then
     logger "scan job $SCANJOB: Failed to OCR page $PAGE - creating non-searchable PDF"
     convert ${SCANFILE} ${TARGET}.pdf
 fi
+rm {SCANFILE}
 
 # Fix the tesseract bug that fails to embed DPI value correct
 
