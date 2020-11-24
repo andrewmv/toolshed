@@ -11,11 +11,15 @@ fi
 
 ### Configuration ###
 
+# Paths #
 BASEPATH=/opt/scan
 OUTDIR=${BASEPATH}/out
+
+# Networking #
 NASHOST=tanngrisnir
 NASUSER=mayan
 NASDIR=/watch
+NASPORT=2223
 
 ### Let's get down to business ###
 
@@ -62,7 +66,7 @@ fi
 
 # Copy to NAS
 logger "scan job $SCANJOB: Copying scan to NAS"
-scp -P 2222 -i ${BASEPATH}/.ssh/id_rsa ${OUTDIR}/${OUTFILE} ${NASUSER}@${NASHOST}:${NASDIR}
+scp -P ${NASPORT} -i ${BASEPATH}/.ssh/id_rsa ${OUTDIR}/${OUTFILE} ${NASUSER}@${NASHOST}:${NASDIR}
 if [[ $? -ne 0 ]]; then
     logger "scan job $SCANJOB: Copy failed"
     mv ${OUTDIR}/${OUTFILE} ${BASEPATH}/dlq
