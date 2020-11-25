@@ -18,11 +18,62 @@ FUZZ_FACTOR="8%"
 UNPAPER_EXTRA_ARGS="--layout single --deskew-scan-range 10 --no-grayfilter --mask-scan-threshold 0.25"
 SKIP_DESKEWING=False 
 
+# Thread management #
+MAXTHREADS=4
+BASEPATH=/opt/scan
+LOCKFILE=${BASEPATH}/.jobcount
+
+### Functions ###
+
+# Block until THREADCOUNT < MAXTHREADS, then increment THREADCOUNT
+inc_threads() {
+    while true; do
+        (
+            flock 9
+            THREADCOUNT=`cat ${LOCKFILE}`
+            case $THREADCOUNT in
+                ''|*[!0-9]*)
+                    echo "Error: Threadcount isn't a positve integer - resetting lockfile: ${LOCKFILE}"
+                    echo -n 0 > ${LOCKFILE}
+                    THREADCOUNT=0 ;;
+                *) ;;
+            esac
+            if [[ $THREADCOUNT -lt $MAXTHREADS ]]; then
+                echo -n $(( $THREADCOUNT + 1 )) > ${LOCKFILE}
+                return 0
+            else
+                return 1
+            fi
+        ) 9< ${LOCKFILE}
+        [[ $? -ne 0 ]] || break
+        sleep 1;
+    done
+}
+
+# Atomically decrement THREADCOUNT
+dec_threads() {
+    (
+        flock 9
+        THREADCOUNT=`cat ${LOCKFILE}`
+        case $THREADCOUNT in
+            ''|*[!0-9]*)
+                echo "Error: Threadcount isn't a positve integer - resetting lockfile: ${LOCKFILE}"
+                echo -n 0 > ${LOCKFILE} ;;
+            *)
+                echo -n $(( $THREADCOUNT - 1 )) > ${LOCKFILE} ;;
+        esac
+    ) 9< ${LOCKFILE}
+}
+
 ### The Good Stuff ###
 
 SCANJOB=$1
 PAGE=$2
 SCANFILE=$3
+STATUS=0
+
+# Wait for an available thread
+inc_threads
 
 # Detect orientation, rotate, and trim
 
@@ -49,10 +100,14 @@ SCANFILE=${TARGET}
 
 TARGET=$(echo ${SCANFILE} | sed -r 's/(deskewed|rotated)(.*)\.pnm$/ocr\2/')
 logger "scan job $SCANJOB: OCRing page $PAGE"
-tesseract ${SCANFILE} ${TARGET} -l eng pdf
+OMP_THREAD_LIMIT=1 tesseract ${SCANFILE} ${TARGET} -l eng pdf
 if [[ $? -ne 0 ]]; then
     logger "scan job $SCANJOB: Failed to OCR page $PAGE - creating non-searchable PDF"
     convert ${SCANFILE} ${TARGET}.pdf
+    if [[ $? -ne 0 ]]; then
+        logger "scan job $SCANJOB: Fatal: Failed to create non-searchable PDF for page $PAGE"
+        STATUS=1
+    fi
 fi
 rm ${SCANFILE}
 
@@ -61,6 +116,11 @@ rm ${SCANFILE}
 mogrify -set units PixelsPerInch -density 300 ${TARGET}.pdf
 
 # Return successful even if mogrification failed
+
 logger "scan job $SCANJOB: Finished processing page $PAGE"
-exit 0
+
+# Release our worker thread
+dec_threads
+
+exit $STATUS
 

@@ -11,10 +11,15 @@ fi
 
 ### Configuration ###
 
+# Paths #
 BASEPATH=/opt/scan
 OUTDIR=${BASEPATH}/out
+
+# Networking #
 NASHOST=tanngrisnir
-NASUSER=paperless
+NASUSER=mayan
+NASDIR=/watch
+NASPORT=2223
 
 ### Let's get down to business ###
 
@@ -23,7 +28,7 @@ SCANJOB=$2
 
 # The filename at the end of the tunnel
 date="$(date +%F_%H.%M.%S)"
-OUTFILE="$date.pdf"
+OUTFILE="autoscan-$date.pdf"
 
 PAGE=0
 for SCANFILE in ${SCANDIR}/scan*.pnm; do 
@@ -61,7 +66,7 @@ fi
 
 # Copy to NAS
 logger "scan job $SCANJOB: Copying scan to NAS"
-scp -P 2222 -i ${BASEPATH}/.ssh/id_rsa ${OUTDIR}/${OUTFILE} ${NASUSER}@${NASHOST}:
+scp -P ${NASPORT} -i ${BASEPATH}/.ssh/id_rsa ${OUTDIR}/${OUTFILE} ${NASUSER}@${NASHOST}:${NASDIR}
 if [[ $? -ne 0 ]]; then
     logger "scan job $SCANJOB: Copy failed"
     mv ${OUTDIR}/${OUTFILE} ${BASEPATH}/dlq
