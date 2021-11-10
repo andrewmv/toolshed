@@ -9,3 +9,5 @@
 
 exiftool -tagsFromFile @ $1 "-IPTC:DigitalCreationDate<IPTC:DateCreated" "-IPTC:DigitalCreationTime<IPTC:TimeCreated" "-EXIF:CreateDate<EXIF:DateTimeOriginal"
 
+# Also fix the DST offset if needed
+exiftool -tagsFromFile @ $1 "-DigitalCreationTime-=00:00:00-01:00"
