@@ -7,5 +7,5 @@
 # Useful when syncing clocks between bodies in post, and wanting the resulting album 
 # to display correctly
 
-exiftool -tagsFromFile @ $1 "-IPTC:DigitalCreationDate<IPTC:DateCreated" "-IPTC:DigitalCreationTime<IPTC:TimeCreated"
+exiftool -tagsFromFile @ $1 "-IPTC:DigitalCreationDate<IPTC:DateCreated" "-IPTC:DigitalCreationTime<IPTC:TimeCreated" "-EXIF:CreateDate<EXIF:DateTimeOriginal"
 
